@@ -34,8 +34,9 @@ int aa_calc_profile_hash(struct aa_profile *profile, u32 version, void *start,
 {
 	struct {
 		struct shash_desc shash;
-		char ctx[crypto_shash_descsize(apparmor_tfm)];
+		char *ctx;
 	} desc;
+	desc.ctx=kmalloc(crypto_shash_descsize(apparmor_tfm),GFP_KERNEL);
 	int error = -ENOMEM;
 	u32 le32_version = cpu_to_le32(version);
 
@@ -66,6 +67,7 @@ int aa_calc_profile_hash(struct aa_profile *profile, u32 version, void *start,
 
 fail:
 	kfree(profile->hash);
+	kfree(desc.ctx);
 	profile->hash = NULL;
 
 	return error;
